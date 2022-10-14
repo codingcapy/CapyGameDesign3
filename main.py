@@ -100,6 +100,9 @@ class World:
                 WINDOW.blit(lost_label, (WINDOW_WIDTH // 2 - lost_label.get_width() // 2, 350))
                 pygame.time.wait(3000)
                 main_menu()
+            elif self.player.exp >= 4100:
+                pygame.time.wait(3000)
+                main_menu()
 
     def trigger_defeat_particles(self, pos, particle_type):
         self.animation.create_particles(particle_type, pos, self.visible_sprites)
