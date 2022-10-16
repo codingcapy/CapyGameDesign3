@@ -56,7 +56,7 @@ class World:
                 x = col_index * TILESIZE
                 y = row_index * TILESIZE
                 if col == 'x':
-                    Tile((x, y), [self.visible_sprites, self.obstacle_sprites, self.attackable_sprites], 'object')
+                    Tile((x, y), [self.visible_sprites, self.obstacle_sprites], 'object')
                 if col == 'p':
                     self.player = Player((x, y), [self.visible_sprites], self.obstacle_sprites, self.create_attack,
                                          self.remove_attack, self.create_magic)
@@ -100,7 +100,7 @@ class World:
                 WINDOW.blit(lost_label, (WINDOW_WIDTH // 2 - lost_label.get_width() // 2, 350))
                 pygame.time.wait(3000)
                 main_menu()
-            elif self.player.exp >= 4100:
+            elif self.player.exp >= 4000:
                 pygame.time.wait(3000)
                 main_menu()
 
