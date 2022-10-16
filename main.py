@@ -30,7 +30,7 @@ MP_COLOR = '#7b2cbf'
 UI_BORDER_ACTIVE_COLOR = 'gold'
 
 weapon_data = {'sword': {'cooldown': 50, 'damage': 15, 'graphics': 'assets/weapon/sword/down.png'}}
-magic_data = {'heal': {'damage': 16, 'cost': 20, 'graphics': 'assets/magic/heal/3.png'}}
+magic_data = {'heal': {'damage': 10, 'cost': 20, 'graphics': 'assets/magic/heal/3.png'}}
 monster_data = {'mushroom': {'hp': 100, 'exp': 100, 'damage': 10, 'attack_type': 'slam', 'speed': 3, 'resistance': 1,
                              'attack_radius': 100, 'notice_radius': 200}}
 
@@ -516,7 +516,7 @@ class MagicAnimation:
         if player.mp >= cost:
             player.hp += damage
             player.mp -= cost
-            if player.hp > - player.stats['hp']:
+            if player.hp >= player.stats['hp']:
                 player.hp = player.stats['hp']
             self.animation.create_particles('heal', player.rect.center, groups)
 
