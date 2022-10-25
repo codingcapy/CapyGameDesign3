@@ -1,6 +1,7 @@
 # author: Paul Kim
 # date: October 9, 2022
 # version: 1.0
+import sys
 from math import sin
 from os import walk
 
@@ -32,7 +33,9 @@ UI_BORDER_ACTIVE_COLOR = 'gold'
 weapon_data = {'sword': {'cooldown': 50, 'damage': 15, 'graphics': 'assets/weapon/sword/down.png'}}
 magic_data = {'heal': {'damage': 10, 'cost': 20, 'graphics': 'assets/magic/heal/3.png'}}
 monster_data = {'mushroom': {'hp': 100, 'exp': 100, 'damage': 10, 'attack_type': 'slam', 'speed': 3, 'resistance': 1,
-                             'attack_radius': 100, 'notice_radius': 200}}
+                             'attack_radius': 100, 'notice_radius': 200},
+                'boss': {'hp': 1000, 'exp': 1000, 'damage': 20, 'attack_type': 'slam', 'speed': 3, 'resistance': 1,
+                         'attack_radius': 100, 'notice_radius': 200}}
 
 
 class World:
@@ -62,6 +65,10 @@ class World:
                                          self.remove_attack, self.create_magic)
                 if col == 'm':
                     monster_name = 'mushroom'
+                    Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites,
+                          self.damage_player, self.trigger_defeat_particles, self.add_exp)
+                if col == 'b':
+                    monster_name = 'boss'
                     Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites,
                           self.damage_player, self.trigger_defeat_particles, self.add_exp)
 
@@ -480,6 +487,8 @@ class Animation:
     def __init__(self):
         self.frames = {'mushroom': import_folder('assets/monster/mushroom/defeat'),
                        'slam': import_folder('assets/monster/mushroom/slam'),
+                       'boss': import_folder('assets/monster/boss/defeat'),
+                       'flame': import_folder('assets/monster/boss/flame'),
                        'heal': import_folder('assets/magic/heal')}
 
     def create_particles(self, animation_type, pos, groups):
@@ -609,7 +618,8 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_c:
                     world.toggle_menu()
-    exit()
+    pygame.quit()
+    sys.exit()
 
 
 def main_menu():
