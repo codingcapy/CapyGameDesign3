@@ -34,7 +34,7 @@ weapon_data = {'sword': {'cooldown': 50, 'damage': 15, 'graphics': 'assets/weapo
 magic_data = {'heal': {'damage': 10, 'cost': 20, 'graphics': 'assets/magic/heal/3.png'}}
 monster_data = {'mushroom': {'hp': 100, 'exp': 100, 'damage': 10, 'attack_type': 'slam', 'speed': 3, 'resistance': 1,
                              'attack_radius': 100, 'notice_radius': 200},
-                'boss': {'hp': 1000, 'exp': 1000, 'damage': 20, 'attack_type': 'slam', 'speed': 3, 'resistance': 1,
+                'boss': {'hp': 1000, 'exp': 1000, 'damage': 20, 'attack_type': 'flame', 'speed': 3, 'resistance': 1,
                          'attack_radius': 100, 'notice_radius': 200}}
 
 
@@ -101,7 +101,7 @@ class World:
             self.player.vulnerable = False
             self.player.hurt_time = pygame.time.get_ticks()
             self.animation.create_particles(attack_type, self.player.rect.center, [self.visible_sprites])
-            if self.player.hp <= 0:
+            if self.player.hp <= -10:
                 lost_font = pygame.font.SysFont("arial", 60)
                 lost_label = lost_font.render(f"Game Over", 1, 'white')
                 WINDOW.blit(lost_label, (WINDOW_WIDTH // 2 - lost_label.get_width() // 2, 350))
@@ -240,6 +240,9 @@ class Player(Entity):
         self.vulnerable = True
         self.hurt_time = None
         self.invulnerability_duration = 400
+        self.dashing = False
+        self.dash_cooldown = 400
+        self.dash_time = None
 
     def initiate_player_assets(self):
         character_path = 'assets/player/'
@@ -270,17 +273,21 @@ class Player(Entity):
             self.status = 'right'
         else:
             self.direction.x = 0
-        if keys[pygame.K_SPACE] and not self.attacking:
+        if keys[pygame.K_q] and not self.attacking:
             self.attacking = True
             self.attack_time = pygame.time.get_ticks()
             self.create_attack()
-        if keys[pygame.K_q] and not self.attacking:
+        if keys[pygame.K_w] and not self.attacking:
             self.attacking = True
             self.attack_time = pygame.time.get_ticks()
             style = list(magic_data.keys())[self.magic_index]
             damage = list(magic_data.values())[self.magic_index]['damage'] + self.stats['magic']
             cost = list(magic_data.values())[self.magic_index]['cost']
             self.create_magic(style, damage, cost)
+        if keys[pygame.K_SPACE] and not self.dashing:
+            self.dashing = True
+            self.dash_time = pygame.time.get_ticks()
+            self.dash()
 
     def get_status(self):
         if self.direction.x == 0 and self.direction.y == 0:
@@ -321,6 +328,12 @@ class Player(Entity):
         spell_damage = magic_data[self.magic]['damage']
         return base_damage + spell_damage
 
+    def dash(self):
+        self.speed += 5
+
+    def remove_dash(self):
+        self.speed -= 5
+
     def cooldowns(self):
         current_time = pygame.time.get_ticks()
         if self.attacking:
@@ -330,6 +343,10 @@ class Player(Entity):
         if not self.vulnerable:
             if current_time - self.hurt_time >= self.invulnerability_duration:
                 self.vulnerable = True
+        if self.dashing:
+            if current_time - self.dash_time >= self.dash_cooldown:
+                self.dashing = False
+                self.remove_dash()
 
     def mp_recovery(self):
         if self.mp < self.stats['mp']:
@@ -571,14 +588,16 @@ class UpgradeMenu:
         controls_font = pygame.font.SysFont('Arial', 35)
         controls_label = controls_font.render("Controls", 1, 'white')
         controls_display = controls_font.render("Arrow keys: move player", 1, 'white')
-        controls_display2 = controls_font.render("Space bar: attack", 1, 'white')
-        controls_display3 = controls_font.render("Q:Heal magic", 1, 'white')
-        controls_display4 = controls_font.render("C:Pause", 1, 'white')
+        controls_display2 = controls_font.render("Space bar: dash", 1, 'white')
+        controls_display3 = controls_font.render("Q:Attack", 1, 'white')
+        controls_display4 = controls_font.render("W:Heal Magic", 1, 'white')
+        controls_display5 = controls_font.render("Esc/i/c/m:Pause", 1, 'white')
         WINDOW.blit(controls_label, (WINDOW_WIDTH // 2 - controls_label.get_width(), 200))
         WINDOW.blit(controls_display, (WINDOW_WIDTH // 2 - controls_label.get_width(), 250))
         WINDOW.blit(controls_display2, (WINDOW_WIDTH // 2 - controls_label.get_width(), 300))
         WINDOW.blit(controls_display3, (WINDOW_WIDTH // 2 - controls_label.get_width(), 350))
         WINDOW.blit(controls_display4, (WINDOW_WIDTH // 2 - controls_label.get_width(), 400))
+        WINDOW.blit(controls_display5, (WINDOW_WIDTH // 2 - controls_label.get_width(), 450))
 
 
 def import_folder(path):
@@ -616,7 +635,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_c:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_c or event.key == pygame.K_m or event.key == pygame.K_i:
                     world.toggle_menu()
     pygame.quit()
     sys.exit()
